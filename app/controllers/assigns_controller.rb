@@ -19,6 +19,23 @@ class AssignsController < ApplicationController
     redirect_to team_url(params[:team_id]), notice: destroy_message
   end
 
+  def update
+    team = Team.friendly.find(params[:team_id])
+    if current_user.id == team.owner_id
+      assign = Assign.find(params[:id])
+      team.owner_id = assign.user_id
+
+      if team.save
+        user = User.find(assign.user_id)
+        redirect_to team_url(team), notice: '権限を移動しました！'
+      else
+        redirect_to team_url(team), notice: '権限移動に失敗しました！'
+      end
+    else
+      redirect_to team_url(team), notice: '権限移動はリーダーしか出来ません'
+    end
+  end
+
   private
 
   def assign_params
@@ -35,13 +52,13 @@ class AssignsController < ApplicationController
       'メンバーを削除しました。'
     else
       'なんらかの原因で、削除できませんでした。'
-    end    
-  end  
-  
+    end
+  end
+
   def email_reliable?(address)
     address.match(/\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i)
   end
-  
+
   def set_next_team(assign, assigned_user)
     another_team = Assign.find_by(user_id: assigned_user.id).team
     change_keep_team(assigned_user, another_team) if assigned_user.keep_team_id == assign.team_id
