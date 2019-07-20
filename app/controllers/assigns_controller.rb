@@ -27,6 +27,7 @@ class AssignsController < ApplicationController
 
       if team.save
         user = User.find(assign.user_id)
+        AssignMailer.change_owner_mail(user.email,team).deliver
         redirect_to team_url(team), notice: '権限を移動しました！'
       else
         redirect_to team_url(team), notice: '権限移動に失敗しました！'
