@@ -21,6 +21,16 @@ class AgendasController < ApplicationController
     end
   end
 
+  def destroy
+    @agenda = Agenda.find(params[:id])
+    if @agenda.user_id == current_user.id || @agenda.team.owner_id == current_user.id
+      @agenda.destroy
+      redirect_to dashboard_url, notice: 'アジェンダを削除しました！'
+    else
+      redirect_to dashboard_url, notice: '作成者とチームリーダしか削除出来ません！'
+    end
+  end
+
   private
 
   def set_agenda
